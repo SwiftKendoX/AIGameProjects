@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SUPER PRODUCTIVITY APP 3000: BACKWARDS EDITION</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: auto; }
+  body {
+    margin: 0;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    background: repeating-linear-gradient(45deg, #ff00ff, #ff00ff 10px, #00ffff 10px, #00ffff 20px);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><text y="24" font-size="24">👉</text></svg>') 0 0, auto;
+  }
+
+  #topbar {
+    background: yellow;
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    font-size: 22px;
+    animation: blink 0.5s infinite, shake 0.3s infinite;
+    border-bottom: 5px dashed black;
+    position: sticky;
+    top: 0;
+    z-index: 500;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes shake { 0%{transform:translateX(-2px)} 50%{transform:translateX(2px)} 100%{transform:translateX(-2px)} }
+
+  #app {
+    max-width: 700px;
+    margin: 20px auto;
+    background: white;
+    border: 8px ridge purple;
+    padding: 20px;
+    box-shadow: 0 0 40px lime;
+  }
+
+  h1 {
+    text-align: center;
+    color: orange;
+    text-shadow: 3px 3px red;
+    font-size: 40px;
+  }
+
+  .counter {
+    text-align: center;
+    background: black;
+    color: lime;
+    font-family: monospace;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 3px solid lime;
+    position: sticky;
+    top: 50px;
+    z-index: 400;
+  }
+
+  .section {
+    border: 3px dotted magenta;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #fff8dc;
+    position: relative;
+  }
+
+  .section h2 {
+    margin-top: 0;
+    color: teal;
+    text-decoration: underline wavy red;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 16px;
+    padding: 10px 18px;
+    margin: 5px;
+    border-radius: 0;
+    border: 4px outset #ccc;
+    background: linear-gradient(to bottom, #eee, #999);
+    cursor: pointer;
+  }
+  button:active { border-style: inset; }
+
+  #runaway-wrap {
+    height: 120px;
+    position: relative;
+    border: 2px dashed gray;
+    overflow: hidden;
+  }
+  #runaway-btn {
+    position: absolute;
+    top: 40px; left: 40%;
+    background: red;
+    color: white;
+    font-weight: bold;
+  }
+
+  #progress-outer {
+    width: 100%;
+    height: 30px;
+    border: 3px solid black;
+    background: #ddd;
+    margin: 10px 0;
+  }
+  #progress-inner {
+    height: 100%;
+    width: 0%;
+    background: repeating-linear-gradient(45deg, lime, lime 8px, darkgreen 8px, darkgreen 16px);
+    transition: width 0.2s;
+  }
+
+  #captcha-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin: 10px 0;
+  }
+  #captcha-grid div {
+    height: 60px;
+    background: gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  input[type=text], input[type=password] {
+    font-size: 16px;
+    padding: 6px;
+    width: 200px;
+  }
+
+  .toast {
+    position: fixed;
+    background: black;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 9999;
+    pointer-events: none;
+    animation: fadeup 2s forwards;
+  }
+  @keyframes fadeup {
+    0% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-40px); }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  .modal-box {
+    background: white;
+    border: 5px solid crimson;
+    padding: 20px 30px;
+    max-width: 320px;
+    text-align: center;
+    position: relative;
+  }
+  .modal-box button { margin-top: 10px; }
+
+  #achievements {
+    font-size: 13px;
+    background: #eee;
+    padding: 10px;
+    border: 2px solid #999;
+  }
+  #achievements span.locked { color: #aaa; }
+  #achievements span.unlocked { color: green; font-weight: bold; }
+
+  #win-screen {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    background: gold;
+    border: 6px solid darkorange;
+  }
+
+  #glitch-cursor-follower {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: red;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.05s;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: white;
+    font-size: 12px;
+  }
+
+  .marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    background: navy;
+    color: white;
+    padding: 4px 0;
+    font-weight: bold;
+  }
+  .marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 8s linear infinite;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  #maze {
+    width: 220px;
+    height: 220px;
+    background: #eee;
+    border: 3px solid black;
+    position: relative;
+    margin: 10px auto;
+  }
+  #maze-player {
+    width: 20px; height: 20px;
+    background: red;
+    position: absolute;
+    top: 100px; left: 100px;
+  }
+  #maze-goal {
+    width: 20px; height: 20px;
+    background: green;
+    position: absolute;
+    top: 10px; left: 10px;
+  }
+
+  #drag-zone {
+    width: 100%;
+    height: 150px;
+    border: 3px solid black;
+    background: #eee;
+    position: relative;
+    overflow: hidden;
+  }
+  #drag-box {
+    width: 40px; height: 40px;
+    background: blue;
+    position: absolute;
+    top: 55px; left: 20px;
+    cursor: grab;
+  }
+
+  .mirror-text {
+    transform: scaleX(-1);
+    display: inline-block;
+    font-size: 18px;
+  }
+
+  #colorInvertSwatch {
+    width: 80px; height: 40px;
+    display: inline-block;
+    border: 2px solid black;
+    vertical-align: middle;
+  }
+
+  #scroll-zone {
+    height: 150px;
+    overflow-y: scroll;
+    border: 3px solid black;
+    padding: 10px;
+    background: #f0f0f0;
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">⚠️ WARNING: THIS APP IS 100% NOT BROKEN. EVERYTHING IS EXACTLY AS INTENDED. ⚠️</div>
+<div class="marquee"><span>Welcome to SUPER PRODUCTIVITY APP 3000: BACKWARDS EDITION!!! Scrolling is inverted!!! Controls are reversed!!! Nothing does what it says!!! There are 14 stations!!! Good luck!!! Maybe don't trust this marquee either!!!</span></div>
+
+<div id="app">
+  <h1>🎉 Task Manager Deluxe 🎉</h1>
+  <div class="counter">Misery counter: <span id="misery">0</span> failed attempts | Time wasted: <span id="timer">0</span>s | Stations cleared: <span id="stationsCleared">0</span>/14</div>
+
+  <div class="section">
+    <h2>1. The "Submit" Button</h2>
+    <p>Try to click submit. It's right there. Should be easy.</p>
+    <div id="runaway-wrap">
+      <button id="runaway-btn">Submit</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2. Confirm Your Task</h2>
+    <p>Press "Yes" to confirm you completed your task, or "No" if you didn't.</p>
+    <button id="yesBtn">✅ Yes</button>
+    <button id="noBtn">❌ No</button>
+    <p id="confirmResult"></p>
+  </div>
+
+  <div class="section">
+    <h2>3. Upload Progress</h2>
+    <button id="uploadBtn">Start Upload</button>
+    <div id="progress-outer"><div id="progress-inner"></div></div>
+    <p id="progress-text">0% complete</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Login Form (for "security")</h2>
+    <input type="text" id="username" placeholder="Username"><br><br>
+    <input type="password" id="password" placeholder="Password"><br><br>
+    <button id="loginBtn">Log In</button>
+    <p id="loginMsg"></p>
+  </div>
+
+  <div class="section">
+    <h2>5. Settings Toggles</h2>
+    <label><input type="checkbox" id="darkmode"> Enable Dark Mode</label><br><br>
+    <label><input type="checkbox" id="notifs"> Disable Notifications</label><br><br>
+    <label>Volume (drag right to raise, watch what happens): <input type="range" id="volume" min="0" max="100" value="50"></label>
+    <span id="volumeLabel">50</span>
+  </div>
+
+  <div class="section">
+    <h2>6. Prove You're Human</h2>
+    <p>Click all squares that do NOT contain a 🚦.</p>
+    <div id="captcha-grid"></div>
+    <button id="captchaSubmit">Verify</button>
+    <p id="captchaMsg"></p>
+  </div>
+
+  <div class="section">
+    <h2>7. Close This Notice</h2>
+    <p>You have an important notice. Please close it.</p>
+    <button id="openNoticeBtn">Open Notice</button>
+  </div>
+
+  <div class="section">
+    <h2>8. Type Your Name (letters arrive backwards)</h2>
+    <p>Type "HELLO" and watch what actually appears.</p>
+    <input type="text" id="backwardsInput" placeholder="Type here">
+  </div>
+
+  <div class="section">
+    <h2>9. Arrow Key Maze (controls are reversed)</h2>
+    <p>Click the maze, then use arrow keys to move the red dot to the green square. Up is down. Left is right. You get the idea.</p>
+    <div id="maze" tabindex="0">
+      <div id="maze-player"></div>
+      <div id="maze-goal"></div>
+    </div>
+    <p id="mazeMsg"></p>
+  </div>
+
+  <div class="section">
+    <h2>10. Drag the Box (mouse is inverted)</h2>
+    <p>Try to drag the blue box with your mouse. It moves opposite to your drag direction.</p>
+    <div id="drag-zone">
+      <div id="drag-box"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>11. Color Picker (shows the opposite color)</h2>
+    <input type="color" id="colorPicker" value="#ff0000">
+    <span id="colorInvertSwatch"></span>
+    <p style="font-size:12px">Whatever you pick, the swatch shows the inverted color, not your color.</p>
+  </div>
+
+  <div class="section">
+    <h2>12. Counter (buttons are swapped)</h2>
+    <p>Count: <span id="counterVal">0</span></p>
+    <button id="incBtn">➕ Increase</button>
+    <button id="decBtn">➖ Decrease</button>
+  </div>
+
+  <div class="section">
+    <h2>13. Mini Scroll Zone (inverted inside too)</h2>
+    <p>Scroll inside this box. It scrolls the opposite direction of your wheel.</p>
+    <div id="scroll-zone">
+      <p class="mirror-text">Read this if you can, it's mirrored for fun.</p>
+      <p>Line A - keep scrolling</p>
+      <p>Line B - almost there</p>
+      <p>Line C - nope, further</p>
+      <p>Line D - this is fine</p>
+      <p>Line E - you'll get it eventually</p>
+      <p>Line F - or not</p>
+      <p>Line G - the bottom, allegedly</p>
+      <p>Line H - jk keep going</p>
+      <p>Line I - seriously though</p>
+      <p>Line J - the actual bottom</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>14. The Real Win Button</h2>
+    <p style="font-size:11px;color:#999">(hint: everything above was a distraction. or was it. good luck.)</p>
+    <button id="realWinBtn">🏆 Actually Finish</button>
+  </div>
+
+  <div id="win-screen">
+    <h2>🎊 CONGRATULATIONS 🎊</h2>
+    <p id="winMsg"></p>
+    <button onclick="location.reload()">Do it all again (why would you)</button>
+  </div>
+
+  <div id="achievements">
+    <strong>Achievements:</strong><br>
+    <span id="ach1" class="locked">🔒 Chased the button 10 times</span><br>
+    <span id="ach2" class="locked">🔒 Got rejected by login 5 times</span><br>
+    <span id="ach3" class="locked">🔒 Failed the captcha</span><br>
+    <span id="ach4" class="locked">🔒 Opened 5 notices</span><br>
+    <span id="ach5" class="locked">🔒 Reached 100% misery</span><br>
+    <span id="ach6" class="locked">🔒 Survived the inverted page scroll for 15 seconds</span><br>
+    <span id="ach7" class="locked">🔒 Solved the reversed maze</span><br>
+    <span id="ach8" class="locked">🔒 Dragged the box the wrong way 10 times</span>
+  </div>
+</div>
+
+<footer>SUPER PRODUCTIVITY APP 3000: BACKWARDS EDITION — nothing is real, nothing works, that's the joke.</footer>
+<div id="glitch-cursor-follower"></div>
+
+<script>
+let misery = 0;
+let seconds = 0;
+let chaseCount = 0;
+let loginFails = 0;
+let noticeCount = 0;
+let stationsCleared = 0;
+let pageScrollSurviveStart = null;
+
+setInterval(() => {
+  seconds++;
+  document.getElementById('timer').textContent = seconds;
+  if (pageScrollSurviveStart !== null && seconds - pageScrollSurviveStart >= 15) {
+    unlock('ach6');
+  }
+}, 1000);
+
+function bumpMisery(n = 1) {
+  misery += n;
+  document.getElementById('misery').textContent = misery;
+  if (misery >= 100) unlock('ach5');
+}
+
+function clearStation() {
+  stationsCleared++;
+  document.getElementById('stationsCleared').textContent = stationsCleared;
+}
+
+function toast(msg, x, y) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  t.style.left = (x || Math.random() * (window.innerWidth - 200)) + 'px';
+  t.style.top = (y || Math.random() * (window.innerHeight - 100)) + 'px';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+function unlock(id) {
+  const el = document.getElementById(id);
+  if (el.classList.contains('locked')) {
+    el.classList.remove('locked');
+    el.classList.add('unlocked');
+    el.textContent = '🏆 ' + el.textContent.slice(2);
+    toast('Achievement unlocked!');
+  }
+}
+
+document.addEventListener('mousemove', e => {
+  const f = document.getElementById('glitch-cursor-follower');
+  const offX = (Math.random() - 0.5) * 60;
+  const offY = (Math.random() - 0.5) * 60;
+  f.style.transform = `translate(${e.clientX + offX}px, ${e.clientY + offY}px)`;
+});
+
+// GLOBAL INVERTED PAGE SCROLL
+let scrollLock = false;
+window.addEventListener('wheel', (e) => {
+  if (scrollLock) return;
+  e.preventDefault();
+  scrollLock = true;
+  window.scrollBy({ top: -e.deltaY * 1.2, left: 0, behavior: 'auto' });
+  if (pageScrollSurviveStart === null) pageScrollSurviveStart = seconds;
+  requestAnimationFrame(() => { scrollLock = false; });
+}, { passive: false });
+
+// 1. RUNAWAY BUTTON
+const wrap = document.getElementById('runaway-wrap');
+const runBtn = document.getElementById('runaway-btn');
+function dodge() {
+  const wrapRect = wrap.getBoundingClientRect();
+  const maxX = wrapRect.width - runBtn.offsetWidth - 10;
+  const maxY = wrapRect.height - runBtn.offsetHeight - 10;
+  runBtn.style.left = Math.max(0, Math.random() * maxX) + 'px';
+  runBtn.style.top = Math.max(0, Math.random() * maxY) + 'px';
+}
+runBtn.addEventListener('mouseenter', () => {
+  chaseCount++;
+  bumpMisery();
+  dodge();
+  if (chaseCount >= 10) unlock('ach1');
+  if (chaseCount >= 25) {
+    runBtn.textContent = 'Fine, click me';
+    runBtn.removeEventListener('mouseenter', dodge);
+  }
+});
+runBtn.addEventListener('click', () => {
+  toast('ERROR 404: Submission not found', runBtn.getBoundingClientRect().left, runBtn.getBoundingClientRect().top);
+  bumpMisery(2);
+  dodge();
+  clearStation();
+});
+
+// 2. YES/NO SWAPPED
+document.getElementById('yesBtn').addEventListener('click', () => {
+  document.getElementById('confirmResult').textContent = '❌ Task marked as NOT completed. (You clicked Yes.)';
+  bumpMisery();
+  clearStation();
+});
+document.getElementById('noBtn').addEventListener('click', () => {
+  document.getElementById('confirmResult').textContent = '✅ Task marked as completed! Great job. (You clicked No.)';
+  bumpMisery();
+  clearStation();
+});
+
+// 3. FAKE PROGRESS BAR
+document.getElementById('uploadBtn').addEventListener('click', () => {
+  let pct = 0;
+  const inner = document.getElementById('progress-inner');
+  const text = document.getElementById('progress-text');
+  const iv = setInterval(() => {
+    if (pct < 99) {
+      pct += Math.random() * 8;
+      pct = Math.min(pct, 99);
+    } else {
+      clearInterval(iv);
+      setTimeout(() => {
+        pct = 0;
+        inner.style.width = '0%';
+        text.textContent = 'Upload failed at 99%. Reconnecting... (0% complete)';
+        bumpMisery(3);
+        clearStation();
+      }, 1200);
+      return;
+    }
+    inner.style.width = pct + '%';
+    text.textContent = Math.floor(pct) + '% complete';
+  }, 200);
+});
+
+// 4. LOGIN ALWAYS WRONG
+document.getElementById('loginBtn').addEventListener('click', () => {
+  loginFails++;
+  bumpMisery();
+  const msgs = [
+    'Incorrect password. Try again.',
+    'Incorrect password. (Yes, that one was also wrong.)',
+    'Username not found, even though you just typed it.',
+    'Password rejected: too correct.',
+    'Login servers are experiencing "success", please try again later.'
+  ];
+  document.getElementById('loginMsg').textContent = msgs[Math.min(loginFails - 1, msgs.length - 1)];
+  document.getElementById('password').value = '';
+  if (loginFails >= 5) { unlock('ach2'); clearStation(); }
+});
+
+// 5. TOGGLES DO THE OPPOSITE / RANDOM
+document.getElementById('darkmode').addEventListener('change', e => {
+  document.body.style.filter = e.target.checked ? 'invert(1) hue-rotate(180deg)' : 'none';
+  toast(e.target.checked ? 'Dark mode disabled (just kidding, enjoy the invert)' : 'Dark mode enabled? unclear');
+});
+document.getElementById('notifs').addEventListener('change', e => {
+  if (e.target.checked) {
+    toast('Notifications are now MORE frequent, as requested');
+    let n = 0;
+    const spam = setInterval(() => {
+      toast('🔔 Notification #' + (++n));
+      if (n >= 5) { clearInterval(spam); clearStation(); }
+    }, 400);
+  }
+});
+document.getElementById('volume').addEventListener('input', e => {
+  const inverted = 100 - e.target.value;
+  document.getElementById('volumeLabel').textContent = inverted;
+});
+
+// 6. CAPTCHA - impossible / trick
+const emojiPool = ['🚦','🚦','🚦','🚦','🚗','🚦','🚦','🚦','🚦'];
+function buildCaptcha() {
+  const grid = document.getElementById('captcha-grid');
+  grid.innerHTML = '';
+  emojiPool.forEach((em) => {
+    const d = document.createElement('div');
+    d.textContent = em;
+    d.addEventListener('click', () => {
+      d.style.outline = '3px solid blue';
+      d.dataset.selected = d.dataset.selected === '1' ? '0' : '1';
+      d.style.opacity = d.dataset.selected === '1' ? '0.4' : '1';
+    });
+    grid.appendChild(d);
+  });
+}
+buildCaptcha();
+document.getElementById('captchaSubmit').addEventListener('click', () => {
+  document.getElementById('captchaMsg').textContent = 'Verification failed. New puzzle generated. (You will never pass this one.)';
+  bumpMisery(2);
+  unlock('ach3');
+  clearStation();
+  buildCaptcha();
+});
+
+// 7. NOTICE THAT MULTIPLIES
+document.getElementById('openNoticeBtn').addEventListener('click', () => {
+  noticeCount++;
+  if (noticeCount >= 5) { unlock('ach4'); clearStation(); }
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+  box.innerHTML = '<strong>⚠️ Important Notice ⚠️</strong><p>This is a very important notice that you must close.</p>';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✖ Close';
+  closeBtn.addEventListener('click', () => {
+    overlay.remove();
+    bumpMisery();
+    if (Math.random() < 0.6) {
+      document.getElementById('openNoticeBtn').click();
+      document.getElementById('openNoticeBtn').click();
+    }
+  });
+  box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+});
+
+// 8. BACKWARDS TYPING INPUT
+const backwardsInput = document.getElementById('backwardsInput');
+let realTyped = '';
+backwardsInput.addEventListener('keydown', (e) => {
+  if (e.key.length === 1) {
+    e.preventDefault();
+    realTyped += e.key;
+    backwardsInput.value = realTyped.split('').reverse().join('');
+    if (realTyped.length === 1) clearStation();
+  } else if (e.key === 'Backspace') {
+    e.preventDefault();
+    realTyped = realTyped.slice(0, -1);
+    backwardsInput.value = realTyped.split('').reverse().join('');
+  }
+});
+
+// 9. REVERSED ARROW KEY MAZE
+const maze = document.getElementById('maze');
+const player = document.getElementById('maze-player');
+const goal = document.getElementById('maze-goal');
+let px = 100, py = 100;
+let mazeSolved = false;
+maze.addEventListener('keydown', (e) => {
+  if (mazeSolved) return;
+  const step = 15;
+  if (e.key === 'ArrowUp') py += step;
+  else if (e.key === 'ArrowDown') py -= step;
+  else if (e.key === 'ArrowLeft') px += step;
+  else if (e.key === 'ArrowRight') px -= step;
+  else return;
+  e.preventDefault();
+  px = Math.max(0, Math.min(200, px));
+  py = Math.max(0, Math.min(200, py));
+  player.style.left = px + 'px';
+  player.style.top = py + 'px';
+  const dist = Math.hypot(px - 10, py - 10);
+  if (dist < 25 && !mazeSolved) {
+    mazeSolved = true;
+    document.getElementById('mazeMsg').textContent = 'You reached the goal! Somehow.';
+    unlock('ach7');
+    clearStation();
+  }
+});
+maze.addEventListener('click', () => maze.focus());
+
+// 10. INVERTED DRAG BOX
+const dragZone = document.getElementById('drag-zone');
+const dragBox = document.getElementById('drag-box');
+let dragging = false;
+let dragStartX, dragStartY, boxStartX, boxStartY;
+let invertedDragCount = 0;
+dragBox.addEventListener('mousedown', (e) => {
+  dragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  boxStartX = dragBox.offsetLeft;
+  boxStartY = dragBox.offsetTop;
+});
+window.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+  let newX = boxStartX - dx;
+  let newY = boxStartY - dy;
+  const maxX = dragZone.clientWidth - dragBox.clientWidth;
+  const maxY = dragZone.clientHeight - dragBox.clientHeight;
+  newX = Math.max(0, Math.min(maxX, newX));
+  newY = Math.max(0, Math.min(maxY, newY));
+  dragBox.style.left = newX + 'px';
+  dragBox.style.top = newY + 'px';
+});
+window.addEventListener('mouseup', () => {
+  if (dragging) {
+    invertedDragCount++;
+    if (invertedDragCount >= 10) { unlock('ach8'); clearStation(); }
+  }
+  dragging = false;
+});
+
+// 11. INVERTED COLOR PICKER
+function invertHex(hex) {
+  hex = hex.replace('#', '');
+  const r = 255 - parseInt(hex.substring(0,2), 16);
+  const g = 255 - parseInt(hex.substring(2,4), 16);
+  const b = 255 - parseInt(hex.substring(4,6), 16);
+  return `rgb(${r},${g},${b})`;
+}
+const colorPicker = document.getElementById('colorPicker');
+const swatch = document.getElementById('colorInvertSwatch');
+function updateSwatch() {
+  swatch.style.background = invertHex(colorPicker.value);
+}
+colorPicker.addEventListener('input', () => { updateSwatch(); clearStation(); });
+updateSwatch();
+
+// 12. SWAPPED COUNTER BUTTONS
+let counterVal = 0;
+document.getElementById('incBtn').addEventListener('click', () => {
+  counterVal--;
+  document.getElementById('counterVal').textContent = counterVal;
+  clearStation();
+});
+document.getElementById('decBtn').addEventListener('click', () => {
+  counterVal++;
+  document.getElementById('counterVal').textContent = counterVal;
+  clearStation();
+});
+
+// 13. INVERTED SCROLL ZONE
+const scrollZone = document.getElementById('scroll-zone');
+scrollZone.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  scrollZone.scrollTop -= e.deltaY;
+  clearStation();
+}, { passive: false });
+
+// 14. THE REAL WIN CONDITION
+document.getElementById('realWinBtn').addEventListener('click', () => {
+  if (misery >= 15 && noticeCount >= 3 && loginFails >= 1 && mazeSolved) {
+    document.getElementById('app').style.display = 'none';
+    document.querySelector('.marquee').style.display = 'none';
+    document.body.style.filter = 'none';
+    const win = document.getElementById('win-screen');
+    win.style.display = 'block';
+    document.getElementById('winMsg').textContent =
+      `You endured ${misery} points of misery, ${noticeCount} notices, ${loginFails} login failures, and solved a reversed maze, over ${seconds} seconds. You win. Sort of.`;
+  } else {
+    bumpMisery(1);
+    toast("Nope. Suffer more first. (Hint: solve the maze too.)");
+  }
+});
+</script>
+
+</body>
+</html>
